@@ -1,0 +1,20 @@
+- name: Setup basic Router
+  hosts: mikrotik_switches
+  become: false
+  gather_facts: false
+  roles:
+  - role: mdombek.mikrotik_auto_mlag.base_setup
+  - role: mdombek.mikrotik_auto_mlag.vlans
+    vars:
+      vlan_id: 100
+      vlan_name: "PVE"
+      vlan_subnet: "192.168.100.1/24"
+  - role: mdombek.mikrotik_auto_mlag.vlans
+    vars:
+      vlan_id: 101
+      vlan_name: "CEPH"
+      vlan_subnet: "192.168.101.1/24"
+  - role: mdombek.mikrotik_auto_mlag.vlans
+    vars:
+      vlan_id: 110
+  - role: mdombek.mikrotik_auto_mlag.mlag

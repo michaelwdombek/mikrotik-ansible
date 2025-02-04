@@ -1,0 +1,23 @@
+
+---
+all:
+  children:
+    mikrotik_switches:
+      vars:
+        username: admin
+        ansible_connection: network_cli
+        ansible_network_os: community.routeros.routeros
+        dns_servers:
+        - 192.168.8.10
+        - 9.9.9.9
+        ntp_servers:
+        - pool.ntp.org
+      hosts:
+        cargo-sw-01: {}
+        cargo-sw-02: {}
+  hosts:
+    cargo-sw-01:
+      ansible_host: 192.168.8.91
+    cargo-sw-02:
+      ansible_host: 192.168.8.92
+

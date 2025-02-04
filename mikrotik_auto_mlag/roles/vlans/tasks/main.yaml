@@ -1,0 +1,44 @@
+- name: Configer VLAN and L3 IF
+  delegate_to: localhost
+  module_defaults:
+    community.routeros.api_modify:
+      hostname: "{{ ansible_host }}"
+      password: "{{ password }}"
+      username: "{{ username }}"
+    community.routeros.api_find_and_modify:
+      hostname: "{{ ansible_host }}"
+      password: "{{ password }}"
+      username: "{{ username }}"
+  block:
+  - name: "Configure VLAN {{ vlan_id }} at bridge"
+    community.routeros.api_modify:
+      path: "interface bridge vlan"
+      data:
+      - vlan-ids: "{{ vlan_id }}"
+        comment: "{{ vlan_name }}"
+        bridge: "{{ vlan_bridge }}"
+        tagged: "{{ vlan_tagged_ifs | join(',') }}"
+
+  - name: "Creates VLAN {{ vlan_id }} interface"
+    community.routeros.api_modify:
+      path: "interface vlan"
+      data:
+      - vlan-id: "{{ vlan_id }}"
+        name: "{{ vlan_name }}"
+        interface: "{{ vlan_bridge }}"
+
+  - name: "Assign IP to VLAN {{ vlan_id }}"
+    when: vlan_subnet is defined
+    community.routeros.api_modify:
+      path: "ip address"
+      data: 
+      - address: "{{ vlan_subnet }}"
+        interface: "{{ vlan_name }}"
+   
+  - name: Ensure vlanfilter is active
+    community.routeros.api_find_and_modify:
+      path: "interface bridge"
+      find:
+        name: "{{ vlan_bridge }}"
+      values:
+        vlan-filtering: true

@@ -1,0 +1,50 @@
+- name: Setup basic router 
+  delegate_to: localhost
+  module_defaults:
+    community.routeros.api:
+      hostname: "{{ ansible_host }}"
+      password: "{{ password }}"
+      username: "{{ username }}"
+    community.routeros.api_modify:
+      hostname: "{{ ansible_host }}"
+      password: "{{ password }}"
+      username: "{{ username }}"
+  
+  block:
+  - name: Arbitrary command example "/system identity print"
+    community.routeros.api:
+      path: "system identity"
+      cmd: "print"
+    register: arbitraryout
+  
+  - name: Dump "Arbitrary command example" output
+    ansible.builtin.debug:
+      msg: '{{ arbitraryout }}'
+
+  - name: Set router identity
+    community.routeros.api_modify:
+      path: "system identity"
+      data:
+      - name: "{{ switch_name }}"
+  
+  - name: Configure DNS resolution
+    community.routeros.api_modify:
+      path: "ip dns"
+      data:
+      - servers: "{{ dns_servers | join(',') }}"
+
+  - name: Configure NTP - client
+    community.routeros.api_modify:
+      path: "system ntp client"
+      data:
+      - servers: "{{ ntp_servers | join(',') }}"
+
+  - name: Configure NTP - server
+    community.routeros.api_modify:
+      path: "system ntp server"
+      data:
+      - enabled: true
+        broadcast: false
+        multicast: true
+        manycast: true
+
