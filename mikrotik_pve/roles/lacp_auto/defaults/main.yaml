@@ -1,0 +1,9 @@
+---
+# Default configuration for LACP interfaces
+lacp_mode: "802.3ad"
+lacp_rate: "fast"
+ignore_system_interfaces: ["bridge"] # List of system interfaces to ignore for LACP bundling
+ignore_interfaces: []  # List of interfaces to ignore for LACP bundling
+min_links: 1  # Minimum number of links required for the LAG to be up
+transmit_hash_policy: "layer2"  # Options: layer2, layer3+4
+lacp_interface_name_template: "LACP_TO_{host}"  # Template for LACP interface names

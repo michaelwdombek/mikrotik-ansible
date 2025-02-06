@@ -2,6 +2,11 @@
 ---
 all:
   children:
+    pve_nodes:
+      hosts:
+        cargo-ai-01: {}
+        cargo-ai-02: {}
+        cargo-ai-03: {}
     mikrotik_switches:
       vars:
         username: admin
@@ -14,10 +19,15 @@ all:
         - pool.ntp.org
       hosts:
         cargo-sw-01: {}
-        cargo-sw-02: {}
+        #cargo-sw-02: {}
   hosts:
     cargo-sw-01:
       ansible_host: 192.168.8.91
     cargo-sw-02:
       ansible_host: 192.168.8.92
-
+    cargo-ai-01:
+      ansible_host: 192.168.8.31
+    cargo-ai-02:
+      ansible_host: 192.168.8.32
+    cargo-ai-03:
+      ansible_host: 192.168.8.33

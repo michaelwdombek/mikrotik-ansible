@@ -1,0 +1,18 @@
+---
+- name: restart_lacp_interface
+  community.routeros.api:
+    hostname: "{{ ansible_host }}"
+    password: "{{ password }}"
+    username: "{{ username }}"
+    path: "interface bonding"
+    cmd: "disable numbers={{ item }}"
+  with_items: "{{ lacp_interfaces }}"
+
+- name: enable_lacp_interface
+  community.routeros.api:
+    hostname: "{{ ansible_host }}"
+    password: "{{ password }}"
+    username: "{{ username }}"
+    path: "interface bonding"
+    cmd: "enable numbers={{ item }}"
+  with_items: "{{ lacp_interfaces }}"
