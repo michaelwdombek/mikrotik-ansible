@@ -1,0 +1,51 @@
+- name: Setup Vlans
+  delegate_to: "{{ ansible_controller }}"
+  block:
+  - name: "Verify if VLAN already {{ vlan.key }} exists"
+    community.routeros.api_info:
+      path: "interface bridge vlan"
+    register: vlan_info
+
+  - name: Check if VLAN {{ vlan.key }} is configured
+    ansible.builtin.set_fact:
+      vlan_is_already_configured: "{{ vlan_info.result | selectattr('vlan-ids', 'equalto', vlan.key) | length > 0 }}"
+
+  - name: "Configure VLAN {{ vlan.key }} at bridge"
+    community.routeros.api_find_and_modify:
+      path: "interface bridge vlan"
+      find: >-
+        {{
+            dict([
+            ['vlan-ids', vlan.key],
+            ['bridge', vlan_bridge]
+            ])
+        }}
+      values:
+        vlan-ids: "{{ vlan.key }}"
+        comment: "{{ vlan.value.name | default(vlan_name) }}"
+        bridge: "{{ vlan_bridge }}"
+        tagged: "{{ vlan_tagged_ifs | join(',') }}"
+    changed_when: not vlan_is_already_configured
+    notify: "Ensure vlanfilter is active on bridge {{ vlan_bridge }}"
+
+  - name: "Create VLAN {{ vlan.key }} interface"
+    community.routeros.api_find_and_modify:
+      path: "interface vlan"
+      find: >-
+        {{
+            dict([['vlan-id', vlan.key]])
+        }}
+      values:
+        name: "{{ vlan.value.name | default(vlan_name) }}"
+        interface: "{{ vlan_bridge }}"
+        comment: "{{ vlan.value.name | default(vlan_name) }}"
+
+  - name: "Assign IP to VLAN {{ vlan.key }}"
+    when: vlan.value.subnet is defined
+    community.routeros.api_find_and_modify:
+      path: "ip address"
+      find:
+        interface: "{{ vlan.value.name | default('VLAN_' ~ vlan.key) }}"
+      values:
+        address: "{{ vlan.value.subnet }}"
+        comment: "{{ vlan.value.name | default('VLAN_' ~ vlan.key) }}"

@@ -1,0 +1,4 @@
+# Default VRRP parameters
+vrrp_priority: 100
+vrrp_advert_interval: 1
+vrrp_preempt: true

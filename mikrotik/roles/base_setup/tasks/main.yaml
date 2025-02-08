@@ -1,0 +1,29 @@
+- name: Setup basic router 
+  delegate_to: "{{ ansible_controller }}"
+  block:
+  - name: Set router identity
+    community.routeros.api_modify:
+      path: "system identity"
+      data:
+      - name: "{{ switch_name }}"
+  
+  - name: Configure DNS resolution
+    community.routeros.api_modify:
+      path: "ip dns"
+      data:
+      - servers: "{{ dns_servers | join(',') }}"
+
+  - name: Configure NTP - client
+    community.routeros.api_modify:
+      path: "system ntp client"
+      data:
+      - servers: "{{ ntp_servers | join(',') }}"
+
+  - name: Configure NTP - server
+    community.routeros.api_modify:
+      path: "system ntp server"
+      data:
+      - enabled: true
+        broadcast: false
+        multicast: true
+        manycast: true

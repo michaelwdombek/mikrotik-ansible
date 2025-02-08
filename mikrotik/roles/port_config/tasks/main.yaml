@@ -1,0 +1,21 @@
+---
+- name: Gather physical ethernet interface facts
+  community.routeros.api_facts:
+    path: "interface ethernet"
+  register: ethernet_facts
+
+- name: Filter physical ports (matching ether1-x or combo1-x)
+  set_fact:
+    physical_ports: >-
+      {{
+        ethernet_facts.response | selectattr('name', 'match', '^(ether1|combo1)(-|$)') | list
+      }}
+
+- name: Process undefined physical ports
+  block:
+  - name: "Create physical port config"
+    include_tasks: _pyh_port.yaml
+    loop: "{{ physical_ports }}"
+    loop_control:
+      loop_var: item
+    when: (ports is not defined) or (item.name not in (ports | dict2items | map(attribute='key') | list))

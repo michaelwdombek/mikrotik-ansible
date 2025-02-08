@@ -1,0 +1,38 @@
+---
+- name: Create WireGuard interface if not already present
+  community.routeros.api_modify:
+    path: "interface wireguard"
+    data:
+      - name: "{{ wireguard_interface_name | default('wg0') }}"
+        private-key: "{{ wireguard_private_key | default(omit) }}"
+        listen-port: "{{ wireguard_listen_port | default(13231) }}"
+  # This task is idempotent if the interface already exists.
+
+- name: Assign local IP to the WireGuard interface
+  community.routeros.api_modify:
+    path: "ip address"
+    data:
+      - address: "{{ wireguard_local_address }}"
+        interface: "{{ wireguard_interface_name | default('wg0') }}"
+  # Ensure the WireGuard interface has its local IP address.
+
+- name: Gather currently configured IP addresses on the router
+  community.routeros.api_facts:
+    path: "ip address"
+  register: ip_address_facts
+
+- name: Extract configured networks from IP address entries
+  set_fact:
+    configured_networks: "{{ ip_address_facts.response | map(attribute='address') | list | unique }}"
+  # The configured_networks will be a list of addresses in CIDR format.
+
+- name: Create WireGuard peer for the remote endpoint
+  community.routeros.api_modify:
+    path: "interface wireguard peer"
+    data:
+      - interface: "{{ wireguard_interface_name | default('wg0') }}"
+        public-key: "{{ wireguard_peer_public_key }}"
+        endpoint-address: "{{ wireguard_endpoint }}"
+        persistent-keepalive: 25
+        allowed-address: "{{ configured_networks | join(',') }}"
+  # This creates the tunnel peer and advertises all locally configured networks.

@@ -1,0 +1,20 @@
+    - name: Shutdown port {{ item.name }}
+      community.routeros.api_modify:
+        path: "interface ethernet"
+        data:
+          - name: "{{ item.name }}"
+            disabled: true
+
+    - name: Add comment "unconfigured" to port {{ item.name }}
+      community.routeros.api_modify:
+        path: "interface ethernet"
+        data:
+          - name: "{{ item.name }}"
+            comment: "unconfigured"
+
+    - name: Remove port {{ item.name }} from bridge configuration
+      community.routeros.api_find_and_modify:
+        path: "interface bridge port"
+        find:
+          interface: "{{ item.name }}"
+        state: absent

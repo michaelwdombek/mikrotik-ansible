@@ -1,0 +1,5 @@
+# Default LACP parameters
+lacp_mode: "802.3ad"
+# Optionally, you can define a naming convention for the bonding interface:
+lacp_bond_prefix: "bond"
+ansible_controller: localhost

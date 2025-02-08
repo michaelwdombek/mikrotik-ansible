@@ -1,0 +1,10 @@
+ntp_servers: 
+- ptbtime1.ptb.de
+- time.fu-berlin.de
+
+dns_servers:
+- 192.168.8.1
+- 9.9.9.9
+
+switch_name: "{{ inventory_hostname }}"
+ansible_controller: localhost

@@ -1,0 +1,7 @@
+- name: "Ensure vlanfilter is active on bridge {{ vlan_bridge }}"
+  community.routeros.api_find_and_modify:
+    path: "interface bridge"
+    find:
+      name: "{{ vlan_bridge }}"
+    values:
+      vlan-filtering: true

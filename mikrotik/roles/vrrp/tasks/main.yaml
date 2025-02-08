@@ -1,0 +1,17 @@
+---
+- name: "Configure VRRP for VLANs with VRRP enabled"
+  community.routeros.api_modify:
+    path: "interface vrrp"
+    data:
+      - interface: "{{ vlan.value.name }}"
+        vrid: "{{ vrrp_id }}"
+        priority: "{{ vrrp_priority }}"
+        preemption-mode: "{{ vrrp_preempt | ternary('enabled', 'disabled') }}"
+        interval: "{{ vrrp_advert_interval }}"
+        # Compute virtual-address as needed; for example, using the VLAN subnet:
+        virtual-address: "{{ vlan.value.subnet | regex_replace('/.*', '/32') }}"
+  loop: "{{ vlans | dict2items }}"
+  loop_control:
+    loop_var: vlan
+    label: "{{ vlan.key }}"
+  when: vlan.value.vrrp | default(false)

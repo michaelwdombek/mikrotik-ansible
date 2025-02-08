@@ -1,0 +1,4 @@
+vlan_bridge: "bridge"
+vlan_name: "{{ 'VLAN_' ~ vlan_id }}"
+vlan_tagged_ifs: [ "{{ vlan_bridge }}"]  # expects a list
+ansible_controller: "localhost"

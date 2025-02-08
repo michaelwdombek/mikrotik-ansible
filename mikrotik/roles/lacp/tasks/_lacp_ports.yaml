@@ -1,0 +1,17 @@
+    - name: "Clear configuration on physical interfaces for group {{ item.key }}"
+      community.routeros.api_modify:
+        path: "interface ethernet"
+        data:
+          - name: "{{ port }}"
+            comment: "Cleared for LACP configuration"
+      loop: "{{ item.value }}"
+      loop_control:
+        loop_var: port
+
+    - name: "Create bonding interface for server {{ item.key }}"
+      community.routeros.api_modify:
+        path: "interface bonding"
+        data:
+          - name: "{{ lacp_bond_prefix }}_{{ item.key }}"
+            mode: "{{ lacp_mode }}"
+            slaves: "{{ item.value | join(',') }}"
