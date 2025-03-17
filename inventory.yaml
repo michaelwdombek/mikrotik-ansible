@@ -1,72 +1,165 @@
 
 ---
 all:
+  vars:
+    dns_servers:
+     - 9.9.9.9
+    ntp_servers:
+    - pool.ntp.org
   children:
-    pve_nodes:
-      hosts:
-        cargo-ai-01: {}
-        cargo-ai-02: {}
-        cargo-ai-03: {}
-    mikrotik_switches:
+    mkrtk_gnrl:
       vars:
-
         username: admin
-        #ansible_connection: network_cli
         ansible_network_os: community.routeros.routeros
         vlans:
+          10:
+            name: "mgmt"
+            subnet: "192.168.10.1/24"
+            stp: root
+            tagged: 
+            - mkrtk_dc
           100:
-            name: "PVE"
-            subnet: "192.168.100.1/24"
-            vrrp: true
-          101:
-            name: "CEPH"
-            subnet: "192.168.101.1/24"
-            vrrp: true
-        dns_servers:
-        - 192.168.8.10
-        - 9.9.9.9
-        ntp_servers:
-        - pool.ntp.org
+            name: "office"
+            subnet: "192.168.8.5/24" 
+            stp: root
+            tagged: 
+            - mkrtk_dc
+        ports:
+          mkrtk_dc:
+            type: lacp
+            slaves:
+            - ether1
+            - ether2
+    mkrtk_dc:
+      vars:
+        username: admin
+        ansible_network_os: community.routeros.routeros
+        vlans:
+          10:
+            name: "mgmt"
+            tagged:
+            -  cargo-test-1
+            -  cargo-test-2
+            -  cargo-test-3
+            -  cargo-test-4
+            - cargo-cn-01
+            - cargo-cn-02
+            - cargo-cn-03
+            - cargo-cnt-01
+          11:
+            name: "ceph"
+            tagged:
+            -  cargo-test-1
+            -  cargo-test-2
+            -  cargo-test-3
+            -  cargo-test-4
+            - cargo-cn-01
+            - cargo-cn-02
+            - cargo-cn-03
+            - cargo-cnt-01
+          12:
+            name: "corosync"
+            tagged:
+            -  cargo-test-1
+            -  cargo-test-2
+            -  cargo-test-3
+            -  cargo-test-4
+            - cargo-cn-01
+            - cargo-cn-02
+            - cargo-cn-03
+            - cargo-cnt-01
+          13:
+            name: "vmmigration"          
+            tagged:
+            -  cargo-test-1
+            -  cargo-test-2
+            -  cargo-test-3
+            -  cargo-test-4
+            - cargo-cn-01
+            - cargo-cn-02
+            - cargo-cn-03
+            - cargo-cnt-01
+          100:
+            name: "office"
+            tagged:
+            -  cargo-test-1
+            -  cargo-test-2
+            -  cargo-test-3
+            -  cargo-test-4
+            - cargo-cn-01
+            - cargo-cn-02
+            - cargo-cn-03
+            - cargo-cnt-01
+          666:
+            name: "mclagcom"
+            tagged:
+            -  cargo-test-1
+            -  cargo-test-2
+            -  cargo-test-3
+            -  cargo-test-4
+            - cargo-cn-01
+            - cargo-cn-02
+            - cargo-cn-03
+            - cargo-cnt-01
+        ports:
+          cargo-test-01:
+            type: mlag
+            mlag_id: 1
+            slaves:
+            - ether1
+          cargo-test-02:
+            type: mlag
+            mlag_id: 2
+            slaves:
+            - ether2
+          cargo-test-03:
+            type: mlag
+            mlag_id: 3
+            slaves:
+            - ether3
+          cargo-test-04:
+            type: mlag
+            mlag_id: 4
+            slaves:
+            - ether4
+          cargo-cn-01:
+            type: mlag
+            mlag_id: 5
+            slaves:
+            - ether5
+          cargo-cn-02:
+            type: mlag
+            mlag_id: 6
+            slaves:
+            - ether6
+          cargo-cn-03:
+            type: mlag
+            mlag_id: 7
+            slaves:
+            - ether7
+          cargo-cnt-01:
+            type: mlag
+            mlag_id: 8
+            slaves:
+            - ether8
+          cargo-sw-00:
+            type: mlag
+            slaves:
+            - combo2
+          peer-bond:
+            type: peer-port
+            slaves:
+            - combo3
+            - combo4
+            pvid: 666
       hosts:
-        cargo-sw-01:
-          vrrp_id: 1
-          ports:
-            ether1:
-              connects: "cargo-ai-01"
-            ether2:
-              connects: "cargo-ai-01"
-            ether3:
-              connects:  "cargo-ai-02"
-            ether4:
-              connects: "cargo-ai-02"
-            ether5:
-              connects: "cargo-ai-03"
-            ether6:
-              connects: "cargo-ai-03"
-            ether7:
-              connects: "cargo-ws-01"
-              tag: 100
-            ether8:
-              connects: "cargo-sw-02"
-            ether9:
-              connects: "UPLINK"
-
-        cargo-sw-02:
-          vrrp_id: 2
-          ports:
-            ether8:
-              connects: "cargo-sw-02"
-            ether9:
-              connects: "UPLINK"
-
+        cargo-sw-01: {}
+        cargo-sw-02: {}
   hosts:
+  hosts:
+    cargo-sw-00:
+      ansible_host: 192.168.8.90
     cargo-sw-01:
       ansible_host: 192.168.8.91
     cargo-sw-02:
       ansible_host: 192.168.8.92
-    cargo-ai-01:
-      ansible_host: 192.168.8.31
-    cargo-ai-02:
-      ansible_host: 192.168.8.32
-    cargo-ai-03:
-      ansible_host: 192.168.8.33
