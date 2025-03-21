@@ -1,0 +1,41 @@
+- name: "Check if group {{ group.name }} exists"
+  community.routeros.command:
+    commands:
+      - /user group print where name="{{ group.name }}"
+  changed_when: false
+  register: group_exists
+- name: debug group_exists
+  debug:
+    var: group_exists
+
+- name: "Create user group {{ group.name }} if it doesn't exist"
+  community.routeros.command:
+    commands:
+      - /user group add name="{{ group.name }}"
+  when: group_exists.stdout[0] | length == 0 and group is defined
+
+- name: Set group permissions if defined
+  community.routeros.command:
+    commands:
+      - /user group set "{{ group.name }}" policy="{{ group.permissions | join(',') }}"
+  when:
+    - group is defined
+    - group.permissions is defined
+
+- name: "Check if user {{ user }} exists"
+  community.routeros.command:
+    commands:
+      - /user print where name="{{ user }}"
+  register: user_exists
+- name: Debug user_exists
+  debug:
+    var: user_exists
+
+- name: "Create user {{ user }} if it doesn't exist"
+  retries: 3
+  delay: 5
+
+  community.routeros.command:
+    commands:
+      - "/user add name={{ user }} group={{ group.name }} password={{ lookup('password', '/dev/null length=15 chars=ascii_letters,digits') }}"
+  when: user_exists.stdout[0] | length == 0

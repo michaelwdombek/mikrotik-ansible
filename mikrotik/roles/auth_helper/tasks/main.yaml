@@ -1,0 +1,16 @@
+# user logs into router os with ssh key and
+# updates the api users password to a new random password
+# returns the new password as MKRTK_API_PASSWORD
+
+- name: Generate a random password using Ansible
+  community.general.random_password:
+    length: 32
+    special: yes
+    digits: yes
+    upper: yes
+    lower: yes
+  register: api_password
+
+- name: Login and set API Password for user {{ api_user }}
+  community.routeros.command:
+    commands: "/user set [find name={{ api_user }}] password={{ api_password.result }}"

@@ -1,0 +1,15 @@
+- name: Setup the Users of the Mikrotik Router
+  gather_facts: false
+  hosts: mikrotik
+  vars:
+    ansible_network_os: community.routeros.routeros
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_cli_ssh_type: libssh
+    ansible_user: "admin"
+  pre_tasks:
+    - name: Info
+      run_once: true
+      ansible.builtin.debug:
+        msg: "Setting up the users of the Mikrotik Router using the initial admin user"
+  roles:
+  - role: mdombek.mikrotik.base_security

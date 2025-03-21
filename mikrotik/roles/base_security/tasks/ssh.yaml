@@ -1,0 +1,67 @@
+---
+- name: Move public ssh key to mikrotik via sftp
+  ansible.netcommon.net_put:
+    src: "{{ ssh_public_key_file }}"
+    protocol: sftp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#- name: Read SSH public key file
+#  run_once: true
+#  ansible.builtin.slurp:
+#    src: "{{ user.ssh_public_key_file }}"
+#  register: ssh_public_key_content
+#  delegate_to: localhost
+
+#- name: Decode public key
+#  run_once: true
+#  delegate_to: localhost
+#  ansible.builtin.set_fact:
+#    ssh_public_key: "{{ ssh_public_key_content['content'] | b64decode | trim }}"
+
+#- name: Get existing SSH keys for user
+#  community.routeros.api_info:
+#    path: "user ssh-keys"
+#  register: existing_ssh_keys
+
+#- name: Check if public key already exists
+#  delegate_to: localhost
+#  ansible.builtin.set_fact:
+#    key_exists: "{{ existing_ssh_keys.result | selectattr('user', 'equalto', user.name) | selectattr('public-key', 'equalto', ssh_public_key) | list | length > 0 }}"
+#    existing_user_keys: "{{ existing_ssh_keys.result | selectattr('user', 'equalto', user.name) | list }}"
+
+#- name: Import SSH public key for user
+#  community.routeros.api:
+#    path: "user ssh-keys import"
+#    args:
+#      public-key-file: "{{ user.ssh_public_key_file }}"
+#      user: "{{ user.name }}"
+#  when: not key_exists
+#  register: import_result
+#  failed_when:
+#    - import_result.error is defined
+#    - "'already exists' not in import_result.error"
+
+#- name: Configure SSH server to enforce key-based authentication
+#  community.routeros.api_find_and_modify:
+#    path: "ip ssh"
+#    find: {}
+#    values:
+#      strong-crypto: yes
+#      always-allow-password-login: "{{ not user.disable_password_auth }}"
+#  register: ssh_config_result

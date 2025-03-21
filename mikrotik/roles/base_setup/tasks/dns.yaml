@@ -1,0 +1,5 @@
+- name: Configure DNS resolution
+  community.routeros.api_modify:
+    path: "ip dns"
+    data:
+    - servers: "{{ dns_servers | join(',') }}"

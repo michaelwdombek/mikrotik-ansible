@@ -3,14 +3,14 @@
 all:
   vars:
     dns_servers:
-     - 9.9.9.9
+    - 9.9.9.9
     ntp_servers:
     - pool.ntp.org
   children:
-    mkrtk_gnrl:
+    mikrotik_core:
+      hosts:
+        cargo-sw-00:
       vars:
-        username: admin
-        ansible_network_os: community.routeros.routeros
         vlans:
           10:
             name: "mgmt"
@@ -30,18 +30,16 @@ all:
             slaves:
             - ether1
             - ether2
-    mkrtk_dc:
+    mikrotik_dc:
       vars:
-        username: admin
-        ansible_network_os: community.routeros.routeros
         vlans:
           10:
             name: "mgmt"
             tagged:
-            -  cargo-test-1
-            -  cargo-test-2
-            -  cargo-test-3
-            -  cargo-test-4
+            - cargo-test-1
+            - cargo-test-2
+            - cargo-test-3
+            - cargo-test-4
             - cargo-cn-01
             - cargo-cn-02
             - cargo-cn-03
@@ -49,10 +47,10 @@ all:
           11:
             name: "ceph"
             tagged:
-            -  cargo-test-1
-            -  cargo-test-2
-            -  cargo-test-3
-            -  cargo-test-4
+            - cargo-test-1
+            - cargo-test-2
+            - cargo-test-3
+            - cargo-test-4
             - cargo-cn-01
             - cargo-cn-02
             - cargo-cn-03
@@ -60,10 +58,10 @@ all:
           12:
             name: "corosync"
             tagged:
-            -  cargo-test-1
-            -  cargo-test-2
-            -  cargo-test-3
-            -  cargo-test-4
+            - cargo-test-1
+            - cargo-test-2
+            - cargo-test-3
+            - cargo-test-4
             - cargo-cn-01
             - cargo-cn-02
             - cargo-cn-03
@@ -71,10 +69,10 @@ all:
           13:
             name: "vmmigration"          
             tagged:
-            -  cargo-test-1
-            -  cargo-test-2
-            -  cargo-test-3
-            -  cargo-test-4
+            - cargo-test-1
+            - cargo-test-2
+            - cargo-test-3
+            - cargo-test-4
             - cargo-cn-01
             - cargo-cn-02
             - cargo-cn-03
@@ -82,10 +80,10 @@ all:
           100:
             name: "office"
             tagged:
-            -  cargo-test-1
-            -  cargo-test-2
-            -  cargo-test-3
-            -  cargo-test-4
+            - cargo-test-1
+            - cargo-test-2
+            - cargo-test-3
+            - cargo-test-4
             - cargo-cn-01
             - cargo-cn-02
             - cargo-cn-03
@@ -93,10 +91,10 @@ all:
           666:
             name: "mclagcom"
             tagged:
-            -  cargo-test-1
-            -  cargo-test-2
-            -  cargo-test-3
-            -  cargo-test-4
+            - cargo-test-1
+            - cargo-test-2
+            - cargo-test-3
+            - cargo-test-4
             - cargo-cn-01
             - cargo-cn-02
             - cargo-cn-03
@@ -153,9 +151,15 @@ all:
             - combo4
             pvid: 666
       hosts:
-        cargo-sw-01: {}
-        cargo-sw-02: {}
-  hosts:
+        cargo-sw-01:
+        cargo-sw-02:
+    mikrotik:
+      vars:
+        ansible_network_os: community.routeros.routeros
+        ansible_network_cli_ssh_type: libssh
+      children:
+        mikrotik_core:
+        mikrotik_dc:
   hosts:
     cargo-sw-00:
       ansible_host: 192.168.8.90

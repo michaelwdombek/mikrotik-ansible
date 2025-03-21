@@ -1,0 +1,29 @@
+# This role set's up the mikrotik router on a very low level. We use routercommand and SSH-keys to do this
+
+# create the set of users
+- name: Setup the base (admin) user on the router
+  ansible.builtin.include_tasks: users.yaml
+  when: change_root_user is defined and change_root_user
+  vars:
+    user: "{{ root_user }}"
+    group: "{{ root_group }}"
+
+- name: Setup the ansible user on the router
+  ansible.builtin.include_tasks: users.yaml
+  #when: change_ansbl_user is defined and change_ansbl_user
+  vars:
+    user: "{{ ansbl_user }}"
+    group: "{{ ansbl_group }}"
+
+- name: Setup the api user on the router
+  ansible.builtin.include_tasks: users.yaml
+  vars:
+    user: "{{ api_user }}"
+    group: "{{ api_group }}"
+
+- name: Add ssh Keys to router
+  ansible.builtin.include_tasks: ssh.yaml
+  when: change_root_user is defined and change_root_user
+  vars:
+    user: "{{ root_user }}"
+    ssh_public_key_file: "{{ root_ssh_public_key_file }}"

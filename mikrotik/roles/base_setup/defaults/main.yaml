@@ -8,3 +8,5 @@ dns_servers:
 
 switch_name: "{{ inventory_hostname }}"
 ansible_controller: localhost
+
+is_ntp_server: true

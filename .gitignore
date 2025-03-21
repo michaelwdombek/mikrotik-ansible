@@ -1,4 +1,5 @@
 # custom
+.idea/
 .venv/
 digest.txt
 # Byte-compiled / optimized / DLL files

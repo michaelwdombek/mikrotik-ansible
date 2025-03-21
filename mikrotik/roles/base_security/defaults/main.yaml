@@ -1,0 +1,40 @@
+root_user: admin
+root_ssh_public_key_file: ~/.ssh/id_rsa.pub
+root_disable_password_auth: false
+root_group:
+  name: full
+
+ansbl_user: ansible_ssh
+ansbl_ssh_public_key_file: ~/.ssh/id_rsa.pub
+ansbl_disable_password_auth: true
+ansbl_group:
+  name: ansible_ssh
+  permissions:
+    - local
+    - ssh
+    - reboot
+    - read
+    - write
+    - policy
+    - password
+    - test
+    - sniff
+    - sensitive
+    - romon
+    - ftp
+    #- api
+    #- winbox
+    #- rest-api
+    #- web
+
+api_user: ansible_api
+api_disable_password_auth: true
+api_group:
+  name: ansible_api
+  permissions:
+    - read
+    - write
+    - api
+    - winbox
+    - rest-api
+    - web

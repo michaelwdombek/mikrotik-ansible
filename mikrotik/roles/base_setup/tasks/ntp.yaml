@@ -1,0 +1,15 @@
+- name: Configure NTP - client
+  community.routeros.api_modify:
+    path: "system ntp client"
+    data:
+    - servers: "{{ ntp_servers | join(',') }}"
+
+- name: Configure NTP - server
+  when: is_ntp_server
+  community.routeros.api_modify:
+    path: "system ntp server"
+    data:
+    - enabled: true
+      broadcast: false
+      multicast: true
+      manycast: true

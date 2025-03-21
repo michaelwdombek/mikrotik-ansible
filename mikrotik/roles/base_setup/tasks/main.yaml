@@ -1,29 +1,59 @@
-- name: Setup basic router 
-  delegate_to: "{{ ansible_controller }}"
-  block:
-  - name: Set router identity
-    community.routeros.api_modify:
-      path: "system identity"
-      data:
-      - name: "{{ switch_name }}"
-  
-  - name: Configure DNS resolution
-    community.routeros.api_modify:
-      path: "ip dns"
-      data:
-      - servers: "{{ dns_servers | join(',') }}"
+- name: Check if group exists
+  community.routeros.command:
+    commands:
+      - /user group print where name="{{ user.group.name }}"
+  register: group_exists
 
-  - name: Configure NTP - client
-    community.routeros.api_modify:
-      path: "system ntp client"
-      data:
-      - servers: "{{ ntp_servers | join(',') }}"
+- name: Create user group if it doesn't exist
+  community.routeros.command:
+    commands:
+      - /user group add name="{{ user.group.name }}"
+  when: group_exists.stdout[0] | length == 0 and user.group is defined
 
-  - name: Configure NTP - server
-    community.routeros.api_modify:
-      path: "system ntp server"
-      data:
-      - enabled: true
-        broadcast: false
-        multicast: true
-        manycast: true
+- name: Set group permissions if defined
+  community.routeros.command:
+    commands:
+      - /user group set "{{ user.group.name }}" policy="{{ user.group.permissions | join(',') }}"
+  when:
+    - user.group is defined
+    - user.group.permissions is defined
+
+- name: Check if user exists
+  community.routeros.command:
+    commands:
+      - /user print where name="{{ user.user }}"
+  register: user_exists
+
+- name: Create user if it doesn't exist
+  community.routeros.command:
+    commands:
+      - /user add name="{{ user.user }}" group="{{ user.group.name }}"
+  when: user_exists.stdout[0] | length == 0
+
+- name: Read SSH public key from file
+  ansible.builtin.slurp:
+    src: "{{ user.ssh_public_key_file | expanduser }}"
+  register: ssh_key_file
+  delegate_to: localhost
+  when:
+    - user.ssh_public_key_file is defined
+
+- name: Add SSH public key to user
+  community.routeros.command:
+    commands:
+      - /user ssh-keys import user="{{ user.user }}" public-key-file=none
+  when:
+    - user.ssh_public_key_file is defined
+    - ssh_key_file is defined
+
+- name: Configure password auth settings
+  community.routeros.command:
+    commands:
+      - /user set "{{ user.user }}" password="{{ lookup('password', '/dev/null length=15 chars=ascii_letters,digits') }}" disabled-password="{{ user.disable_password_auth | default(false) | bool }}"
+  when: user.disable_password_auth is defined
+
+- name: Ensure user is in correct group
+  community.routeros.command:
+    commands:
+      - /user set "{{ user.user }}" group="{{ user.group.name }}"
+  when: user.group is defined
